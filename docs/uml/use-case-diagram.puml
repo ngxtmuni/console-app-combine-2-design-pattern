@@ -1,0 +1,22 @@
+@startuml
+left to right direction
+skinparam shadowing false
+
+title Simple Kitchen Management - Use Case Diagram
+
+actor "Kitchen Staff" as Staff
+
+rectangle "Kitchen Management Console App" {
+  usecase "View All Dishes" as UC_ViewDishes
+  usecase "Add New Dish" as UC_AddDish
+  usecase "Create New Order" as UC_CreateOrder
+  usecase "View All Orders" as UC_ViewOrders
+  usecase "Update Order Status" as UC_UpdateStatus
+}
+
+Staff --> UC_ViewDishes
+Staff --> UC_AddDish
+Staff --> UC_CreateOrder
+Staff --> UC_ViewOrders
+Staff --> UC_UpdateStatus
+@enduml

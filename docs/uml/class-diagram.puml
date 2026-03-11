@@ -1,0 +1,106 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+title Simple Kitchen Management - Class Diagram
+
+package "Entry Point" {
+  class Program {
+    +Main()
+  }
+}
+
+package "UI" {
+  class ConsoleMenu {
+    -_kitchenManager : KitchenManager
+    +Run() : void
+    -ShowAllDishes() : void
+    -AddNewDish() : void
+    -CreateNewOrder() : void
+    -ShowAllOrders() : void
+    -UpdateOrderStatus() : void
+  }
+}
+
+package "Services" {
+  class KitchenManager <<Singleton>> {
+    -LazyInstance : Lazy<KitchenManager>
+    -_dishes : List<Dish>
+    -_orders : List<KitchenOrder>
+    -_dishFactory : DishFactory
+    -_nextDishId : int
+    -_nextOrderId : int
+    -KitchenManager()
+    +Instance : KitchenManager
+    +GetAllDishes() : IReadOnlyList<Dish>
+    +GetAllOrders() : IReadOnlyList<KitchenOrder>
+    +AddDish(category, name, price) : Dish
+    +FindDishById(dishId) : Dish?
+    +CreateOrder(dishId) : KitchenOrder
+    +UpdateOrderStatus(orderId, newStatus) : bool
+  }
+}
+
+package "Factories" {
+  class DishFactory <<Factory>> {
+    +CreateDish(id, category, name, price) : Dish
+  }
+}
+
+package "Models" {
+  abstract class Dish {
+    +Id : int
+    +Name : string
+    +Price : decimal
+    +Category : DishCategory
+    +GetStation() : string
+    +ShowInfo() : string
+  }
+
+  class FoodDish {
+    +GetStation() : string
+  }
+
+  class DrinkDish {
+    +GetStation() : string
+  }
+
+  class KitchenOrder {
+    +OrderId : int
+    +Dish : Dish
+    +Status : OrderStatus
+    +UpdateStatus(newStatus) : void
+    +ShowInfo() : string
+  }
+}
+
+package "Enums" {
+  enum DishCategory {
+    Food
+    Drink
+  }
+
+  enum OrderStatus {
+    Pending
+    Preparing
+    Ready
+  }
+}
+
+Program --> ConsoleMenu : starts
+ConsoleMenu --> KitchenManager : uses
+KitchenManager --> DishFactory : creates dishes via
+KitchenManager "1" *-- "0..*" Dish : manages
+KitchenManager "1" *-- "0..*" KitchenOrder : manages
+
+DishFactory ..> DishCategory : uses
+DishFactory ..> FoodDish : creates
+DishFactory ..> DrinkDish : creates
+
+Dish <|-- FoodDish
+Dish <|-- DrinkDish
+
+Dish --> DishCategory : typed by
+KitchenOrder --> OrderStatus : has status
+KitchenOrder --> Dish : contains
+@enduml

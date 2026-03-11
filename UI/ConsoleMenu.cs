@@ -1,5 +1,4 @@
 using KitchenManagement.ConsoleApp.Enums;
-using KitchenManagement.ConsoleApp.Models;
 using KitchenManagement.ConsoleApp.Services;
 
 namespace KitchenManagement.ConsoleApp.UI;
@@ -33,13 +32,10 @@ public sealed class ConsoleMenu
                     CreateNewOrder();
                     break;
                 case 4:
-                    ShowAllOrders();
-                    break;
-                case 5:
                     UpdateOrderStatus();
                     break;
-                case 6:
-                    ShowDashboard();
+                case 5:
+                    ShowAllOrders();
                     break;
                 case 0:
                     isRunning = false;
@@ -82,9 +78,8 @@ public sealed class ConsoleMenu
         Console.WriteLine("1. View all dishes");
         Console.WriteLine("2. Add new dish");
         Console.WriteLine("3. Create new order");
-        Console.WriteLine("4. View all orders");
-        Console.WriteLine("5. Update order status");
-        Console.WriteLine("6. View kitchen dashboard");
+        Console.WriteLine("4. Update order status");
+        Console.WriteLine("5. View all orders");
         Console.WriteLine("0. Exit");
     }
 
@@ -109,9 +104,8 @@ public sealed class ConsoleMenu
         var category = ReadDishCategory();
         var name = ReadRequiredString("Dish name: ");
         var price = ReadDecimal("Price: ");
-        var preparationTime = ReadInt("Preparation time (minutes): ", value => value > 0);
 
-        var dish = _kitchenManager.AddDish(category, name, price, preparationTime);
+        var dish = _kitchenManager.AddDish(category, name, price);
 
         Console.WriteLine();
         Console.WriteLine("Dish created successfully.");
@@ -125,35 +119,12 @@ public sealed class ConsoleMenu
         Console.WriteLine("----------------------------------------------");
         ShowAllDishesInline();
         Console.WriteLine();
-        Console.WriteLine("Enter dish id and quantity. Type 0 to finish.");
-
-        var requests = new List<(int dishId, int quantity)>();
-
-        while (true)
-        {
-            var dishId = ReadInt("Dish id: ", value => value >= 0);
-            if (dishId == 0)
-            {
-                break;
-            }
-
-            var dish = _kitchenManager.FindDishById(dishId);
-            if (dish is null)
-            {
-                WriteWarning("Dish id does not exist.");
-                continue;
-            }
-
-            var quantity = ReadInt("Quantity: ", value => value > 0);
-            requests.Add((dishId, quantity));
-
-            Console.WriteLine("Item added to pending order.");
-        }
+        var dishId = ReadInt("Choose dish id: ", value => value > 0);
 
         try
         {
-            var order = _kitchenManager.CreateOrder(requests);
-            PrintOrderDetails(order);
+            var order = _kitchenManager.CreateOrder(dishId);
+            Console.WriteLine(order.ShowInfo());
         }
         catch (InvalidOperationException exception)
         {
@@ -178,8 +149,7 @@ public sealed class ConsoleMenu
 
         foreach (var order in orders)
         {
-            PrintOrderDetails(order);
-            Console.WriteLine();
+            Console.WriteLine(order.ShowInfo());
         }
 
         Pause();
@@ -200,7 +170,7 @@ public sealed class ConsoleMenu
 
         foreach (var order in orders)
         {
-            Console.WriteLine(order.ShowSummary());
+            Console.WriteLine(order.ShowInfo());
         }
 
         Console.WriteLine();
@@ -213,41 +183,6 @@ public sealed class ConsoleMenu
             : "Order id was not found.");
 
         Pause();
-    }
-
-    private void ShowDashboard()
-    {
-        Console.WriteLine("Kitchen Dashboard");
-        Console.WriteLine("----------------------------------------------");
-
-        var summary = _kitchenManager.GetDashboardSummary();
-        foreach (var entry in summary)
-        {
-            Console.WriteLine($"{entry.Key,-12}: {entry.Value}");
-        }
-
-        var orders = _kitchenManager.GetAllOrders();
-        Console.WriteLine();
-        Console.WriteLine($"Total orders: {orders.Count}");
-
-        if (orders.Count > 0)
-        {
-            Console.WriteLine($"Revenue estimate: {orders.Sum(order => order.TotalAmount):C}");
-            Console.WriteLine($"Total prep time estimate: {orders.Sum(order => order.EstimatedPreparationTime)} mins");
-        }
-
-        Pause();
-    }
-
-    private static void PrintOrderDetails(KitchenOrder order)
-    {
-        Console.WriteLine(order.ShowSummary());
-        foreach (var item in order.Items)
-        {
-            Console.WriteLine($"  - {item.ShowInfo()}");
-        }
-
-        Console.WriteLine($"  Estimated prep time: {order.EstimatedPreparationTime} mins");
     }
 
     private void ShowAllDishesInline()

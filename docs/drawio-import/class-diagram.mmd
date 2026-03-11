@@ -1,0 +1,92 @@
+classDiagram
+    direction LR
+
+    class Program {
+        +Main()
+    }
+
+    class ConsoleMenu {
+        -KitchenManager _kitchenManager
+        +Run() void
+        -ShowAllDishes() void
+        -AddNewDish() void
+        -CreateNewOrder() void
+        -ShowAllOrders() void
+        -UpdateOrderStatus() void
+    }
+
+    class KitchenManager {
+        <<Singleton>>
+        -Lazy~KitchenManager~ LazyInstance
+        -List~Dish~ _dishes
+        -List~KitchenOrder~ _orders
+        -DishFactory _dishFactory
+        -int _nextDishId
+        -int _nextOrderId
+        -KitchenManager()
+        +KitchenManager Instance
+        +GetAllDishes() IReadOnlyList~Dish~
+        +GetAllOrders() IReadOnlyList~KitchenOrder~
+        +AddDish(category, name, price) Dish
+        +FindDishById(dishId) Dish?
+        +CreateOrder(dishId) KitchenOrder
+        +UpdateOrderStatus(orderId, newStatus) bool
+    }
+
+    class DishFactory {
+        <<Factory>>
+        +CreateDish(id, category, name, price) Dish
+    }
+
+    class Dish {
+        <<abstract>>
+        +int Id
+        +string Name
+        +decimal Price
+        +DishCategory Category
+        +GetStation() string
+        +ShowInfo() string
+    }
+
+    class FoodDish {
+        +GetStation() string
+    }
+
+    class DrinkDish {
+        +GetStation() string
+    }
+
+    class KitchenOrder {
+        +int OrderId
+        +Dish Dish
+        +OrderStatus Status
+        +UpdateStatus(newStatus) void
+        +ShowInfo() string
+    }
+
+    class DishCategory {
+        <<enumeration>>
+        Food
+        Drink
+    }
+
+    class OrderStatus {
+        <<enumeration>>
+        Pending
+        Preparing
+        Ready
+    }
+
+    Program --> ConsoleMenu : starts
+    ConsoleMenu --> KitchenManager : uses
+    KitchenManager --> DishFactory : uses
+    KitchenManager "1" *-- "0..*" Dish : manages
+    KitchenManager "1" *-- "0..*" KitchenOrder : manages
+    DishFactory ..> DishCategory : uses
+    DishFactory ..> FoodDish : creates
+    DishFactory ..> DrinkDish : creates
+    Dish <|-- FoodDish
+    Dish <|-- DrinkDish
+    Dish --> DishCategory : typed by
+    KitchenOrder --> OrderStatus : has status
+    KitchenOrder --> Dish : contains

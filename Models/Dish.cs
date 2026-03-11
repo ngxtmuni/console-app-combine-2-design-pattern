@@ -4,12 +4,11 @@ namespace KitchenManagement.ConsoleApp.Models;
 
 public abstract class Dish
 {
-    protected Dish(int id, string name, decimal price, int preparationTime, DishCategory category)
+    protected Dish(int id, string name, decimal price, DishCategory category)
     {
         Id = id;
         Name = name;
         Price = price;
-        PreparationTime = preparationTime;
         Category = category;
     }
 
@@ -19,17 +18,15 @@ public abstract class Dish
 
     public decimal Price { get; }
 
-    public int PreparationTime { get; }
-
     public DishCategory Category { get; }
 
-    public virtual string GetKitchenNote()
+    public virtual string GetStation()
     {
-        return "General kitchen item";
+        return "General";
     }
 
     public virtual string ShowInfo()
     {
-        return $"[{Id}] {Name} | {Category} | {Price:C} | Prep: {PreparationTime} mins | {GetKitchenNote()}";
+        return $"[{Id}] {Name} | {Category} | {Price:C} | Station: {GetStation()}";
     }
 }

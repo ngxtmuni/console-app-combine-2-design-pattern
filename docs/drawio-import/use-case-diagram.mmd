@@ -1,0 +1,16 @@
+flowchart LR
+    Staff[Kitchen Staff]
+
+    subgraph System[Kitchen Management Console App]
+        ViewDishes([View All Dishes])
+        AddDish([Add New Dish])
+        CreateOrder([Create New Order])
+        ViewOrders([View All Orders])
+        UpdateStatus([Update Order Status])
+    end
+
+    Staff --> ViewDishes
+    Staff --> AddDish
+    Staff --> CreateOrder
+    Staff --> ViewOrders
+    Staff --> UpdateStatus

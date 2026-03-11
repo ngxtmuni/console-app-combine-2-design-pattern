@@ -28,15 +28,12 @@ public sealed class KitchenManager
 
     public IReadOnlyList<KitchenOrder> GetAllOrders()
     {
-        return _orders
-            .OrderBy(order => order.OrderId)
-            .ToList()
-            .AsReadOnly();
+        return _orders.AsReadOnly();
     }
 
-    public Dish AddDish(DishCategory category, string name, decimal price, int preparationTime)
+    public Dish AddDish(DishCategory category, string name, decimal price)
     {
-        var dish = _dishFactory.CreateDish(_nextDishId++, category, name, price, preparationTime);
+        var dish = _dishFactory.CreateDish(_nextDishId++, category, name, price);
         _dishes.Add(dish);
         return dish;
     }
@@ -46,29 +43,12 @@ public sealed class KitchenManager
         return _dishes.FirstOrDefault(dish => dish.Id == dishId);
     }
 
-    public KitchenOrder CreateOrder(IEnumerable<(int dishId, int quantity)> requests)
+    public KitchenOrder CreateOrder(int dishId)
     {
-        var items = new List<OrderItem>();
+        var dish = FindDishById(dishId)
+            ?? throw new InvalidOperationException($"Dish with id {dishId} was not found.");
 
-        foreach (var request in requests)
-        {
-            var dish = FindDishById(request.dishId)
-                ?? throw new InvalidOperationException($"Dish with id {request.dishId} was not found.");
-
-            if (request.quantity <= 0)
-            {
-                throw new InvalidOperationException("Quantity must be greater than zero.");
-            }
-
-            items.Add(new OrderItem(dish, request.quantity));
-        }
-
-        if (items.Count == 0)
-        {
-            throw new InvalidOperationException("Order must contain at least one dish.");
-        }
-
-        var order = new KitchenOrder(_nextOrderId++, items);
+        var order = new KitchenOrder(_nextOrderId++, dish);
         _orders.Add(order);
         return order;
     }
@@ -85,26 +65,9 @@ public sealed class KitchenManager
         return true;
     }
 
-    public IReadOnlyList<KitchenOrder> GetOrdersByStatus(OrderStatus status)
-    {
-        return _orders
-            .Where(order => order.Status == status)
-            .OrderBy(order => order.OrderId)
-            .ToList()
-            .AsReadOnly();
-    }
-
-    public Dictionary<OrderStatus, int> GetDashboardSummary()
-    {
-        return Enum.GetValues<OrderStatus>()
-            .ToDictionary(status => status, status => _orders.Count(order => order.Status == status));
-    }
-
     private void SeedDefaultData()
     {
-        AddDish(DishCategory.Appetizer, "Spring Roll", 4.50m, 8);
-        AddDish(DishCategory.MainCourse, "Beef Steak", 14.99m, 18);
-        AddDish(DishCategory.Drink, "Orange Juice", 3.20m, 3);
-        AddDish(DishCategory.Dessert, "Cheesecake", 5.75m, 6);
+        AddDish(DishCategory.Food, "Fried Rice", 4.50m);
+        AddDish(DishCategory.Drink, "Lemon Tea", 2.00m);
     }
 }

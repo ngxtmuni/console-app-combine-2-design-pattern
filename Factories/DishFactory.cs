@@ -5,14 +5,12 @@ namespace KitchenManagement.ConsoleApp.Factories;
 
 public sealed class DishFactory
 {
-    public Dish CreateDish(int id, DishCategory category, string name, decimal price, int preparationTime)
+    public Dish CreateDish(int id, DishCategory category, string name, decimal price)
     {
         return category switch
         {
-            DishCategory.Appetizer => new Appetizer(id, name, price, preparationTime),
-            DishCategory.MainCourse => new MainCourse(id, name, price, preparationTime),
-            DishCategory.Dessert => new Dessert(id, name, price, preparationTime),
-            DishCategory.Drink => new Drink(id, name, price, preparationTime),
+            DishCategory.Food => new FoodDish(id, name, price),
+            DishCategory.Drink => new DrinkDish(id, name, price),
             _ => throw new ArgumentOutOfRangeException(nameof(category), category, "Unsupported dish category.")
         };
     }
